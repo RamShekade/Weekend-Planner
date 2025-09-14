@@ -1,7 +1,7 @@
 // weather.js
 // Usage: import { checkWeatherForOutdoorActivity } from "../functions/weather";
 
-const OPENWEATHER_API_KEY = "45f2261b0c20880c11bd96d4b1d61659"; // <-- Replace with your key
+const OPENWEATHER_API_KEY = ""; // <-- Replace with your key
 
 /**
  * Checks if weather is suitable for an outdoor activity at a given place and date.

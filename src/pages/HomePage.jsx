@@ -74,7 +74,7 @@ const [weatherError, setWeatherError] = useState("");
     async (position) => {
       try {
         const { latitude: lat, longitude: lon } = position.coords;
-        const apiKey = "45f2261b0c20880c11bd96d4b1d61659";
+        const apiKey = "";
         const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${apiKey}`;
         const res = await fetch(url);
         if (!res.ok) throw new Error("Failed to fetch weather");
