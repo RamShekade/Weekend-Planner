@@ -1,0 +1,144 @@
+.timeline-grid {
+  display: flex;
+  gap: 24px;
+  margin-top: 1.5em;
+}
+.timeline-day-col {
+  flex: 1 1 0;
+  min-width: 220px;
+  background: #f8fafc;
+  border-radius: 16px;
+  padding: 0 10px 20px 10px;
+  box-shadow: 0 2px 8px #e0e7ff18;
+}
+.timeline-day-header {
+  text-align: center;
+  margin: 10px 0 18px 0;
+  font-size: 1.10em;
+  font-weight: 700;
+  color: #3730a3;
+}
+.timeline-slot {
+  margin-bottom: 22px;
+}
+.timeline-slot-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  color: #6366f1;
+  margin-bottom: 6px;
+}
+.add-activity-btn {
+  margin-left: auto;
+  background: #6366f1;
+  color: #fff;
+  font-size: 1.2em;
+  border: none;
+  border-radius: 10px;
+  padding: 2px 13px;
+  cursor: pointer;
+  transition: background 0.13s;
+}
+.timeline-slot-list {
+  min-height: 20px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.timeline-activity-block {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #fff;
+  border-radius: 12px;
+  border-left: 7px solid #e0e7ff;
+  margin: 6px 0;
+  padding: 8px 10px 8px 10px;
+  box-shadow: 0 2px 7px #e0e7ff22;
+  font-size: 1.02em;
+  position: relative;
+  transition: box-shadow 0.13s, border 0.13s;
+}
+.timeline-activity-block.dragging {
+  background: #eef2ff;
+  box-shadow: 0 4px 16px #6366f133;
+}
+.timeline-block-icon {
+  font-size: 1.3em;
+  margin-right: 2px;
+}
+.timeline-block-name {
+  font-weight: 500;
+  flex: 1 1 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.timeline-block-mood {
+  font-size: 1.4em;
+  margin-left: 4px;
+}
+.timeline-block-place {
+  background: none;
+  border: none;
+  font-size: 1.13em;
+  cursor: pointer;
+  margin-left: 4px;
+  color: #6366f1;
+  transition: color 0.13s;
+}
+.timeline-block-place:hover {
+  color: #d97706;
+}
+.move-act-btn, .remove-act-btn {
+  background: none;
+  border: none;
+  margin-left: 7px;
+  color: #a1a1aa;
+  font-size: 1.1em;
+  cursor: pointer;
+  transition: color 0.13s;
+}
+.remove-act-btn:hover {
+  color: #ef4444;
+}
+.timeline-block-mood-btn {
+  background: none;
+  border: none;
+  font-size: 1.3em;
+  cursor: pointer;
+  margin-left: 4px;
+  margin-right: 2px;
+  transition: background 0.13s;
+}
+.timeline-block-mood-btn:hover,
+.timeline-block-mood-btn:focus {
+  background: #f3f4f6;
+  border-radius: 50%;
+}
+
+.timeline-block-mood-picker {
+  position: absolute;
+  z-index: 50;
+  left: 36px;
+  top: 40px;
+  background: #fff;
+  border: 1.5px solid #e0e7ff;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px #6366f122;
+  padding: 8px 12px 8px 9px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.close-mood-picker-btn {
+  background: none;
+  border: none;
+  color: #888;
+  font-size: 1.2em;
+  cursor: pointer;
+  margin-left: 6px;
+  margin-right: 2px;
+  margin-top: 1px;
+}

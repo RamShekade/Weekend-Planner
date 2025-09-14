@@ -1,0 +1,73 @@
+
+.calendar-selector {
+  margin-bottom: 36px;
+}
+.calendar-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+.calendar-btn-row {
+  display: flex;
+  gap: 14px;
+}
+.calendar-btn {
+  background: #fff;
+  border: 2px solid #2277ee;
+  padding: 8px 22px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background 0.2s, border 0.2s;
+}
+.calendar-btn:hover {
+  background: #e0efff;
+  border-color: #0b4d91;
+}
+.calendar-selected {
+  margin-top: 8px;
+  color: #555;
+  font-size: 0.95rem;
+}
+.longweekend-btn {
+  display: block;
+  width: 100%;
+  margin-top: 4px;
+  margin-bottom: 4px;
+  padding: 10px 0;
+  background: #e0e7ff;
+  color: #373780;
+  border: 1.5px solid #6366f133;
+  border-radius: 12px;
+  font-size: 1em;
+  font-weight: 500;
+  transition: background 0.12s, box-shadow 0.12s;
+  box-shadow: 0 2px 8px -5px #6366f133;
+  cursor: pointer;
+}
+
+.longweekend-btn:hover {
+  background: #6366f1;
+  color: #fff;
+  box-shadow: 0 4px 16px -5px #6366f155;
+  border-color: #6366f1;
+}
+
+.calendar-btn-row {
+  margin-bottom: 16px;
+}
+
+/* Optional: Title styling */
+.calendar-title {
+  margin-bottom: 12px;
+  color: #373780;
+  font-weight: 600;
+}
+
+/* Optional: selected days styling */
+.calendar-selected {
+  margin-top: 16px;
+  color: #6366f1;
+  font-size: 1em;
+  font-weight: 500;
+}

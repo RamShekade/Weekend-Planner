@@ -1,0 +1,24 @@
+.cta-btn, .browse-activities-btn, .calendar-confirm-btn {
+  background: #3B82F6; /* sky blue */
+  color: #fff;
+  font-weight: 600;
+  border: none;
+  border-radius: 30px;
+  padding: 14px 40px;
+  font-size: 1.1rem;
+  box-shadow: 0 4px 24px -8px #3B82F677;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
+}
+.cta-btn:hover, .browse-activities-btn:hover, .calendar-confirm-btn:hover {
+  background: #2563eb;
+  transform: scale(1.04);
+}
+
+.highlight {
+  background: #34D399; /* mint green */
+  color: #fff;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-weight: 500;
+}

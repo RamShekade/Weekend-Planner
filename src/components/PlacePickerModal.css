@@ -1,0 +1,45 @@
+.move-modal-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(0,0,0,0.13); /* Optional: subtle darken for focus */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.move-modal {
+  /* Centered popup */
+  max-width: 500px;
+  width: 100%;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 10px 48px #0001, 0 2px 12px #6366f122;
+  padding: 32px 20px 24px 20px;
+  animation: place-modal-fade-in 0.18s;
+  position: relative;
+}
+@keyframes place-modal-fade-in {
+  from { opacity: 0; transform: translateY(18px) scale(0.97);}
+  to   { opacity: 1; transform: none;}
+}
+.place-results-list {
+  list-style: none;
+  margin: 0 0 8px 0;
+  padding: 0;
+  max-height: 120px;
+  overflow-y: auto;
+  border-radius: 6px;
+  border: 1px solid #eee;
+  background: #fafaff;
+}
+.place-result-item {
+  cursor: pointer;
+  padding: 7px 8px;
+  border-bottom: 1px solid #f2f2f2;
+  transition: background 0.13s;
+}
+.place-result-item.selected,
+.place-result-item:hover {
+  background: #e8f0fe;
+}

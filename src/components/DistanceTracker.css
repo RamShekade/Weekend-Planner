@@ -1,0 +1,68 @@
+.distance-tracker-root {
+  background: #f8fafc;
+  border-radius: 18px;
+  padding: 24px 22px 18px 22px;
+  box-shadow: 0 2px 16px #6366f111;
+  max-width: 620px;
+  margin: 32px auto;
+}
+.distance-summary {
+  font-size: 1.13em;
+  color: #374151;
+  margin: 8px 0 0 0;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+.marker-label {
+  background: #2563eb;
+  color: #fff;
+  margin-bottom: 8px;
+  padding: 3px 14px 3px 12px;
+  border-radius: 18px;
+  font-size: 1em;
+  font-weight: 500;
+  box-shadow: 0 2px 8px #2563eb33;
+  position: relative;
+  white-space: nowrap;
+  pointer-events: none;
+  margin-bottom: 7px;
+  border: 2px solid #fff;
+  z-index: 10;
+}
+.distance-task-list {
+  list-style: none;
+  margin: 22px 0 4px 0;
+  padding: 0;
+}
+.distance-task-list li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.11em;
+  padding: 3px 0 2px 0;
+}
+.task-number {
+  background: #2563eb;
+  color: #fff;
+  border-radius: 50%;
+  width: 1.7em;
+  height: 1.7em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.97em;
+  font-weight: 600;
+  margin-right: 4px;
+  box-shadow: 0 1px 4px #2563eb33;
+}
+.task-icon {
+  font-size: 1.11em;
+  margin-right: 3px;
+}
+.task-label {
+    margin-bottom: 50px;
+  font-weight: 500;
+  color: #2d3748;
+}

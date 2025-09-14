@@ -1,0 +1,199 @@
+.top-controls {
+  margin-bottom: 10px;
+}
+.theme-selector {
+  margin-bottom: 6px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.activity-search {
+  width: 100%;
+  font-size: 1.05em;
+  border-radius: 10px;
+  border: 1px solid #e0e7ff;
+  padding: 9px 12px;
+  margin-bottom: 4px;
+}
+.browse-modal {
+  max-width: 850px;
+  width: 850px;
+  min-width: 350px;
+  background: #f8fafc;
+  border-radius: 18px;
+  padding: 34px 30px 28px 30px;
+  /* ...your other styles */
+  box-shadow: 0 10px 48px #6366f112;
+  margin: 0 auto;
+  position: relative;
+}
+@media (max-width: 900px) {
+  .browse-modal {
+    width: 98vw;
+    max-width: 98vw;
+    min-width: 0;
+    padding: 18px 2vw;
+  }
+}
+
+/* Category tab bar as a grid, 4 per row, wraps for small screens */
+.category-tabbar {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px 12px;
+  margin: 0 0 18px 0;
+  background: #f8fafc;
+  border-bottom: 2px solid #e0e7ff;
+  padding-bottom: 12px;
+}
+@media (max-width: 700px) {
+  .category-tabbar {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 500px) {
+  .category-tabbar {
+    grid-template-columns: 1fr;
+  }
+}
+
+.category-tab {
+  padding: 12px 0;
+  border-radius: 12px;
+  border: none;
+  background: #f5f7ff;
+  color: #444;
+  font-size: 1.08em;
+  cursor: pointer;
+  transition: background 0.14s, box-shadow 0.13s;
+  font-weight: 500;
+  outline: none;
+}
+.category-tab.selected, .category-tab:focus, .category-tab:hover {
+  background: #fff;
+  color: #6366f1;
+  box-shadow: 0 2px 8px #6366f133;
+  border-bottom: 2.5px solid #6366f1;
+}
+.browse-activity-card-list {
+  margin: 1em 0;
+}
+.browse-items-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  margin: 0.8em 0 2em 0;
+}
+/* .activity-card {
+  background: #fff;
+  border-radius: 18px;
+  border: 2.5px solid #e0e7ff;
+  box-shadow: 0 4px 16px #e0e7ff30;
+  min-width: 170px;
+  max-width: 190px;
+  min-height: 140px;
+  padding: 20px 12px 14px 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  position: relative;
+  font-size: 1.07em;
+  transition: border 0.13s, box-shadow 0.13s, background 0.13s;
+}
+.activity-card.selected, .activity-card:focus, .activity-card:hover {
+  border: 2.5px solid #6366f1;
+  background: #eef2ff;
+  box-shadow: 0 6px 18px #6366f155;
+}
+.activity-card-emoji {
+  font-size: 2.2em;
+  margin-bottom: 10px;
+}
+.activity-card-name {
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 8px;
+  font-size: 1.13em;
+}
+.activity-card-mood {
+  background: #f0fdf4;
+  color: #16a34a;
+  border-radius: 10px;
+  font-size: 0.97em;
+  padding: 3px 14px;
+  margin-bottom: 2px;
+}
+.activity-card-check {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  color: #22c55e;
+  font-size: 1.35em;
+  pointer-events: none;
+} */
+
+.modal-btn {
+  padding: 10px 28px;
+  border-radius: 16px;
+  background: #2277ee;
+  color: #fff;
+  border: none;
+  font-size: 1rem;
+  cursor: pointer;
+}
+.modal-btn.cancel {
+  background: #bbb;
+  color: #222;
+}
+.modal-btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+.theme-selector {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+  justify-content: center;
+}
+.theme-btn {
+  padding: 7px 26px;
+  border-radius: 18px;
+  background: #f4f2fd;
+  color: #353535;
+  border: 2px solid transparent;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.15s, border 0.15s;
+}
+.theme-btn.selected {
+  background: #2277ee;
+  color: #fff;
+  border: 2px solid #2277ee;
+}
+.theme-btn:hover:not(.selected) {
+  background: #e1eaff;
+}
+
+
+
+
+.browse-modal-bg {
+  position: fixed;
+  left:0; top:0; width:100vw; height:100vh;
+  background: rgba(0,0,0,0.23);
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.browse-modal {
+  background: hsl(0, 0%, 100%);
+  border-radius: 18px;
+  box-shadow: 0 8px 40px -10px #99aaff;
+  padding: 30px 30px 18px 30px;
+  max-width: 1000px;
+  width: 95vw;
+  max-height: 90vh;
+  overflow-y: auto;
+}
