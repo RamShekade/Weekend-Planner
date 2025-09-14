@@ -84,7 +84,7 @@
   gap: 24px;
   margin: 0.8em 0 2em 0;
 }
-/* .activity-card {
+.activity-card {
   background: #fff;
   border-radius: 18px;
   border: 2.5px solid #e0e7ff;
@@ -131,7 +131,7 @@
   color: #22c55e;
   font-size: 1.35em;
   pointer-events: none;
-} */
+}
 
 .modal-btn {
   padding: 10px 28px;
@@ -175,6 +175,21 @@
   background: #e1eaff;
 }
 
+.browse-modal-footer {
+  position: sticky;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: #fff;
+  border-top: 1px solid #e0e7eb;
+  padding: 18px 30px 18px 30px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 16px;
+  z-index: 2;
+  box-shadow: 0 -2px 16px #e0e7ff22;
+  min-height: 100px; 
+}
 
 
 
@@ -195,5 +210,6 @@
   max-width: 1000px;
   width: 95vw;
   max-height: 90vh;
+  
   overflow-y: auto;
 }

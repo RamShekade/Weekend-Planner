@@ -1,7 +1,7 @@
 .chatbot-widget {
   position: fixed;
   right: 32px;
-  bottom: 32px;
+  bottom: 72px;
   width: 320px;
   background: #fff;
   border-radius: 16px;
@@ -76,4 +76,28 @@
   font-weight: 600;
   padding: 0 17px;
   cursor: pointer;
+}
+.chatbot-fab {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 1100;
+}
+.chatbot-popup {
+  position: fixed;
+  right: 32px;
+  bottom: 92px;
+  z-index: 1200;
+  width: 350px;
+  max-width: 95vw;
+  max-height: 80vh;
+  background: #fff;
+  border-radius: 18px 18px 0 18px;
+  box-shadow: 0 6px 36px #0005;
+  overflow: hidden;
+  animation: chatbot-slidein 0.3s;
+}
+@keyframes chatbot-slidein {
+  from { transform: translateY(30px); opacity: 0; }
+  to   { transform: translateY(0); opacity: 1; }
 }

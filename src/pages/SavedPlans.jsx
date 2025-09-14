@@ -2,9 +2,9 @@ import React, { useEffect, useState, useRef } from "react";
 import { getPlansFromStorage, savePlanToStorage } from "../utils/planStorage";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
-import "./PlanMemories.css";
+import "./SavedPlans.css";
 
-export default function PlanMemoriesPage() {
+export default function SavedPlans() {
   const [plans, setPlans] = useState([]);
   const [selected, setSelected] = useState(null); // currently viewed plan
   const [editPlan, setEditPlan] = useState(null); // plan in edit mode

@@ -19,24 +19,22 @@ export async function checkWeatherForOutdoorActivity({ lat, lon, date }) {
   const res = await fetch(url);
   if (!res.ok) throw new Error("Failed to fetch weather");
   const data = await res.json();
-
-  // Find the forecast most closely matching the date
+  console.log(data);
   const inputDate = new Date(date);
   inputDate.setHours(12, 0, 0, 0);
-  const target = Math.floor(inputDate.getTime() / 1000);
 
-  // Find the forecast day closest to the target date (OpenWeather gives next 7 days)
-  let best = data.daily[0];
-  let minDiff = Math.abs(data.daily[0].dt - target);
-  data.daily.forEach(forecast => {
-    const diff = Math.abs(forecast.dt - target);
+  // Find the forecast entry closest to noon on the input date
+  let best = data.list[0];
+  let minDiff = Math.abs(new Date(best.dt_txt) - inputDate);
+  data.list.forEach(forecast => {
+    const diff = Math.abs(new Date(forecast.dt_txt) - inputDate);
     if (diff < minDiff) {
       minDiff = diff;
       best = forecast;
     }
   });
 
-  const weatherMain = best.weather[0].main; // e.g. "Rain", "Clear", "Clouds"
+  const weatherMain = best.weather[0].main; // "Rain", "Clear", etc.
   const goodWeather = !["Rain", "Thunderstorm", "Snow"].includes(weatherMain);
 
   return {

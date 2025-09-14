@@ -264,7 +264,7 @@ export default function BrowseActivitiesModal({ onSave, onClose, plannedDate, pl
           </div>
         )}
 
-        <div className="browse-modal-actions">
+        <div className="browse-modal-footer">
           <button className="modal-btn" onClick={handleSave} disabled={selected.length === 0}>
             Add to Plan
           </button>

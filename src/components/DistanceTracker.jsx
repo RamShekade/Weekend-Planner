@@ -19,6 +19,8 @@ const ORS_API_KEY = "eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6Ijc5OGM
 export default function DistanceTracker() {
   const { plan, selectedDays } = usePlan();
   const [routeInfo, setRouteInfo] = useState(null); // { distance, duration, geometry }
+  const [userLocation, setUserLocation] = useState(null); // { lat, lng }
+  const [locationLoading, setLocationLoading] = useState(false);
   const mapRef = useRef();
   const mapInstance = useRef();
   const markerSource = useRef(new VectorSource());
@@ -44,14 +46,28 @@ export default function DistanceTracker() {
     });
   });
 
-  // 2. Fetch route info from OpenRouteService if >1 point
+  // 2. Insert user location (if present) at the start
+  let routeLocations = locations;
+  if (userLocation) {
+    routeLocations = [
+      {
+        label: "Start (You)",
+        lat: userLocation.lat,
+        lng: userLocation.lng,
+        icon: "🧑‍🚀"
+      },
+      ...locations
+    ];
+  }
+
+  // 3. Fetch route info from OpenRouteService if >1 point
   useEffect(() => {
-    if (locations.length < 2) {
+    if (routeLocations.length < 2) {
       setRouteInfo(null);
       return;
     }
     async function fetchRoute() {
-      const coords = locations.map(p => [p.lng, p.lat]);
+      const coords = routeLocations.map(p => [p.lng, p.lat]);
       const url = "https://api.openrouteservice.org/v2/directions/driving-car/geojson";
       try {
         const res = await fetch(url, {
@@ -81,9 +97,9 @@ export default function DistanceTracker() {
     }
     fetchRoute();
     // eslint-disable-next-line
-  }, [locations.length, JSON.stringify(locations)]);
+  }, [routeLocations.length, JSON.stringify(routeLocations)]);
 
-  // 3. Initialize map and update markers/route
+  // 4. Initialize map and update markers/route
   useEffect(() => {
     // Map and layers (only once)
     if (!mapInstance.current && mapRef.current) {
@@ -106,13 +122,13 @@ export default function DistanceTracker() {
           new Style({
             image: new CircleStyle({
               radius: 16,
-              fill: new Fill({ color: "#fff" }),
-              stroke: new Stroke({ color: "#2563eb", width: 4 })
+              fill: new Fill({ color: feature.get("num") === 1 && userLocation ? "#bbf7d0" : "#fff" }),
+              stroke: new Stroke({ color: feature.get("num") === 1 && userLocation ? "#22c55e" : "#2563eb", width: 4 })
             }),
             text: new Text({
               text: String(feature.get("num") || ""),
               font: "bold 1.15em sans-serif",
-              fill: new Fill({ color: "#2563eb" }),
+              fill: new Fill({ color: feature.get("num") === 1 && userLocation ? "#22c55e" : "#2563eb" }),
               stroke: new Stroke({ color: "#fff", width: 3 }),
               offsetY: 1
             })
@@ -142,7 +158,7 @@ export default function DistanceTracker() {
     routeSource.current.clear();
 
     // Add markers and overlays for all locations
-    locations.forEach((loc, idx) => {
+    routeLocations.forEach((loc, idx) => {
       // Marker as a styled circle with number
       const markerFeature = new Feature({
         geometry: new Point(fromLonLat([loc.lng, loc.lat])),
@@ -159,8 +175,8 @@ export default function DistanceTracker() {
         const overlay = new Overlay({
           element: el,
           position: fromLonLat([loc.lng, loc.lat]),
-           positioning: "bottom-center", // <-- This puts the label above the marker
-  offset: [0, -28]    
+          positioning: "bottom-center",
+          offset: [0, -28]
         });
         mapInstance.current.addOverlay(overlay);
       }
@@ -178,13 +194,38 @@ export default function DistanceTracker() {
     }
 
     // Fit view to all markers/route
-    if (locations.length > 0 && mapInstance.current) {
+    if (routeLocations.length > 0 && mapInstance.current) {
       const extent = markerSource.current.getExtent();
       mapInstance.current.getView().fit(extent, { padding: [40, 40, 40, 40], maxZoom: 15 });
     }
-  }, [locations, routeInfo]);
+  }, [routeLocations, routeInfo, userLocation]);
 
-  // 4. Neat summary text
+  // 5. Geolocation button
+  function handleUseMyLocation() {
+    if (!navigator.geolocation) {
+      alert("Geolocation not supported in your browser");
+      return;
+    }
+    setLocationLoading(true);
+    navigator.geolocation.getCurrentPosition(
+      pos => {
+        setUserLocation({
+          lat: pos.coords.latitude,
+          lng: pos.coords.longitude
+        });
+        setLocationLoading(false);
+      },
+      err => {
+        alert("Could not get your location: " + err.message);
+        setLocationLoading(false);
+      }
+    );
+  }
+  function handleRemoveMyLocation() {
+    setUserLocation(null);
+  }
+
+  // 6. Neat summary text
   function formatDistance(m) {
     if (!m) return "-";
     if (m > 1000) return (m / 1000).toFixed(2) + " km";
@@ -200,6 +241,17 @@ export default function DistanceTracker() {
   return (
     <div className="distance-tracker-root">
       <h3>Route & Distance Overview</h3>
+      <div style={{marginBottom: 10}}>
+        {!userLocation ? (
+          <button onClick={handleUseMyLocation} disabled={locationLoading}>
+            {locationLoading ? "Getting your location..." : "Use My Location as Start"}
+          </button>
+        ) : (
+          <button onClick={handleRemoveMyLocation}>
+            Remove My Location as Start
+          </button>
+        )}
+      </div>
       <div ref={mapRef} style={{
         height: 320,
         width: "100%",
@@ -209,7 +261,7 @@ export default function DistanceTracker() {
         background: "#f9fafb"
       }} />
       <div className="distance-summary">
-        {locations.length < 2 ? (
+        {routeLocations.length < 2 ? (
           <span>Add at least 2 places to see the route!</span>
         ) : routeInfo ? (
           <>
@@ -221,11 +273,12 @@ export default function DistanceTracker() {
         )}
       </div>
       <ul className="distance-task-list">
-        {locations.map((loc, idx) => (
+        {routeLocations.map((loc, idx) => (
           <li key={idx}>
             <span className="task-number">{idx + 1}.</span>
             <span className="task-icon">{loc.icon}</span>
             <span className="task-label">{loc.label}</span>
+            {userLocation && idx === 0 && <span style={{color:"#22c55e",fontWeight:500,marginLeft:8}}>(Start)</span>}
           </li>
         ))}
       </ul>

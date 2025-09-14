@@ -223,7 +223,7 @@
 }
 
 .plan-card-header {
-  padding: 20px;
+  padding: 10px;
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
@@ -277,7 +277,7 @@
 .plan-actions {
   padding: 15px 20px;
   display: flex;
-  gap: 10px;
+  gap: 5px;
   border-top: 1px solid #f1f5f9;
   background-color: #f8fafc;
 }

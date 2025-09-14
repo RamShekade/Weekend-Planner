@@ -1,10 +1,9 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import LandingPage from "./components/LandingPage";
-import HomePage from "./components/HomePage";
+import LandingPage from "./pages/LandingPage";
+import HomePage from "./pages/HomePage";
 import { PlanProvider } from "./context/PlanContext";
 import "./App.css";
-import DistanceTracker from "./components/DistanceTracker";
-import PlanMemoriesPage from "./pages/PlanMemories";
+import SavedPlans from "./pages/SavedPlans";
 
 function App() {
   return (
@@ -13,7 +12,7 @@ function App() {
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/plan" element={<HomePage />} />
-          <Route path="/memory" element={<PlanMemoriesPage />} />
+          <Route path="/saved-plan" element={<SavedPlans />} />
         </Routes>
       </Router>
     </PlanProvider>

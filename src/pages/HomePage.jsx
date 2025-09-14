@@ -1,581 +1,508 @@
-import React, { useState, useEffect } from "react";
-import ActivityBrowser from "../components/ActivityBrowser";
-// import ScheduleCalendar from "../components/ScheduleCalendar";
-import MoodPicker from "../components/MoodPicker";
-import MoodBoard from "../components/MoodBoard";
-import { moods } from "../data/moods";
-import { themes } from "../themes";
-import html2canvas from "html2canvas";
-import "../index.css";
-import TimelineView from "../components/TimelineView";
 
-// Initial Activities
-const initialActivities = [
-  { name: "Brunch", icon: "🥞", category: "Food" },
-  { name: "Hiking", icon: "🥾", category: "Adventure" },
-  { name: "Movie Night", icon: "🎬", category: "Leisure" },
-  { name: "Reading", icon: "📚", category: "Chill" },
-  { name: "Picnic", icon: "🧺", category: "Outdoor" },
-  { name: "Board Games", icon: "🎲", category: "Fun" },
-  { name: "Yoga", icon: "🧘‍♂️", category: "Wellness" },
-  { name: "Coffee Date", icon: "☕", category: "Chill" },
-  { name: "Swimming", icon: "🏊", category: "Active" },
-  { name: "Camping", icon: "🏕️", category: "Adventure" },
-  { name: "Nap", icon: "😴", category: "Lazy" },
-  { name: "Binge-watch", icon: "📺", category: "Lazy" },
-  { name: "New Restaurant", icon: "🍽️", category: "Adventurous" },
+import React, { useState, useRef, useEffect } from "react";
+import Calendar from "react-calendar";
+import "react-calendar/dist/Calendar.css";
+import "./HomePage.css";
+import BrowseActivitiesModal from "../components/BrowseActivitiesModal";
+import PlanTimelineEditor from "../components/PlanEditor";
+import { usePlan } from "../context/PlanContext";
+import { activities } from "../data/activities"; 
+import html2canvas from "html2canvas";
+import DistanceTracker from "../components/DistanceTracker";
+import RecommenderChatbot from "../components/Chatbot";
+import "../components/Chatbot.css";
+import { useNavigate } from "react-router-dom";
+
+
+
+const SLOT_KEYS = ["morning", "afternoon", "evening", "night"];
+const holidays = [
+  { date: "2025-09-14", name: "Ganesh Chaturthi" },
+  { date: "2025-09-22", name: "Sharad Navratri Begins" },
+  { date: "2025-09-25", name: "Eid-e-Milad" },
+  { date: "2025-09-28", name: "Durga Puja Begins" },
+  { date: "2025-09-29", name: "Maha Saptami" },
+  { date: "2025-10-01", name: "Maha Navami" },
+  { date: "2025-10-02", name: "Gandhi Jayanti" },
+  { date: "2025-10-07", name: "Maharishi Valmiki Jayanti" },
+  { date: "2025-10-07", name: "Sukkot Begins (Jewish)" },
+  { date: "2025-10-10", name: "Karva Chauth" },
+  { date: "2025-10-13", name: "Canadian Thanksgiving" },
+  { date: "2025-10-20", name: "Diwali" },
+  { date: "2025-10-22", name: "Govardhan Puja" },
+  { date: "2025-10-23", name: "Bhai Duj" },
+  { date: "2025-11-01", name: "All Saints’ Day (Christian)" },
+  { date: "2025-11-02", name: "All Souls’ Day (Christian)" },
+  { date: "2025-11-05", name: "Guru Nanak Jayanti" },
+  { date: "2025-11-24", name: "Martyrdom of Guru Tegh Bahadur" },
+  { date: "2025-12-06", name: "Saint Nicholas Day" },
+  { date: "2025-12-08", name: "Bodhi Day (Buddhist)" },
+  { date: "2025-12-15", name: "Hanukkah Begins (Jewish)" },
+  { date: "2025-12-22", name: "Hanukkah Ends (Jewish)" },
+  { date: "2025-12-25", name: "Christmas Day" }
 ];
 
-const timeSlots = ["morning", "afternoon", "evening", "night"];
-const days = ["saturday", "sunday"];
-const initialSchedule = {
-  saturday: { morning: null, afternoon: null, evening: null, night: null },
-  sunday: { morning: null, afternoon: null, evening: null, night: null },
-};
-const initialLocked = {
-  saturday: { morning: false, afternoon: false, evening: false, night: false },
-  sunday: { morning: false, afternoon: false, evening: false, night: false },
-};
 
-function HomePage() {
-     const [selectedDates, setSelectedDates] = useState(days);
-  const [activities] = useState(initialActivities);
-  const [schedule, setSchedule] = useState(initialSchedule);
-  const [modal, setModal] = useState({
-    open: false,
-    activity: null,
-    day: null,
-    slot: null,
-  });
-  const [pendingAssignment, setPendingAssignment] = useState(null);
-  const [theme, setTheme] = useState("default");
-  const [weekendMood, setWeekendMood] = useState(null);
-  const [locked, setLocked] = useState(initialLocked);
-
-  // Load schedule, theme, mood, locks from localStorage
+export default function HomePage() {
+  const { selectedDays, setSelectedDays, addActivity, setPlan, plan } = usePlan();
+  const [calendarDone, setCalendarDone] = useState(false);
+  const [dateValue, setDateValue] = useState([null, null]);
+  const [browseModal, setBrowseModal] = useState({ open: false, day: null, slot: null });
+  const [browsing, setBrowsing] = useState(false);
+  const [saveMsg, setSaveMsg] = useState("");
+  const planRef = useRef();
+  const [holidayName, setHolidayName] = useState("");
+  const [showDistance, setShowDistance] = useState(false);
+  const [animateWave, setAnimateWave] = useState(true);
+  const [showChatbot, setShowChatbot] = useState(false);
+const [weatherInfo, setWeatherInfo] = useState(null);
+const [weatherLoading, setWeatherLoading] = useState(true);
+const [weatherError, setWeatherError] = useState("");
+ 
   useEffect(() => {
-    const saved = localStorage.getItem("weekendly-schedule");
-    if (saved) setSchedule(JSON.parse(saved));
-    const savedTheme = localStorage.getItem("weekendly-theme");
-    if (savedTheme) setTheme(savedTheme);
-    const savedMood = localStorage.getItem("weekendly-mood");
-    if (savedMood) setWeekendMood(savedMood);
-    const savedLocks = localStorage.getItem("weekendly-locks");
-    if (savedLocks) setLocked(JSON.parse(savedLocks));
+    
+    document.body.classList.add('beach-theme');
+    
+    // Cleanup function'
+     if (!navigator.geolocation) {
+    setWeatherError("Geolocation is not supported.");
+    setWeatherLoading(false);
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(
+    async (position) => {
+      try {
+        const { latitude: lat, longitude: lon } = position.coords;
+        const apiKey = "45f2261b0c20880c11bd96d4b1d61659";
+        const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${apiKey}`;
+        const res = await fetch(url);
+        if (!res.ok) throw new Error("Failed to fetch weather");
+        const data = await res.json();
+        setWeatherInfo(data);
+      } catch (err) {
+        setWeatherError("Couldn't fetch weather data.");
+      } finally {
+        setWeatherLoading(false);
+      }
+    },
+    () => {
+      setWeatherError("Couldn't get your location.");
+      setWeatherLoading(false);
+    }
+  );
+    return () => {
+      document.body.classList.remove('beach-theme');
+    };
   }, []);
 
-  // Save schedule to localStorage
-  useEffect(() => {
-    localStorage.setItem("weekendly-schedule", JSON.stringify(schedule));
-  }, [schedule]);
-  useEffect(() => {
-    localStorage.setItem("weekendly-theme", theme);
-  }, [theme]);
-  useEffect(() => {
-    localStorage.setItem("weekendly-mood", weekendMood || "");
-  }, [weekendMood]);
-  useEffect(() => {
-    localStorage.setItem("weekendly-locks", JSON.stringify(locked));
-  }, [locked]);
+  const navigate = useNavigate();
 
-  // Apply theme CSS vars
-  useEffect(() => {
-    const vars = themes[theme];
-    for (const k in vars) {
-      document.documentElement.style.setProperty(k, vars[k]);
-    }
-  }, [theme]);
+function handleSavedPlanClick() {
+  navigate("/saved-plan"); // or whatever route you want
+}
 
-  // Add activity
-  const handleAddToSchedule = (activity) =>
-    setModal({ open: true, activity, day: null, slot: null });
 
-  // Assign activity: open mood picker after slot selection
-  const handleAssign = (day, slot) => {
-    setPendingAssignment({ day, slot });
-    setModal({ open: false, activity: modal.activity });
-  };
+function getWeatherSuggestion(weather) {
+  if (!weather) return null;
+  const main = weather.weather[0]?.main || "";
+  const temp = weather.main?.temp;
 
-  // After mood pick, save activity with mood
-  const handleMoodPick = (moodObj) => {
-    if (!pendingAssignment) return;
-    const { day, slot } = pendingAssignment;
-    setSchedule((prev) => ({
-      ...prev,
-      [day]: {
-        ...prev[day],
-        [slot]: {
-          ...modal.activity,
-          mood: moodObj.label,
-          moodEmoji: moodObj.emoji,
-          moodColor: moodObj.color,
-        },
-      },
-    }));
-    setPendingAssignment(null);
-    setModal({ open: false, activity: null });
-  };
+  if (main === "Clear" && temp > 20) return { msg: "☀️ It's sunny and warm! Try some outdoor adventures.", emoji: "☀️" };
+  if (main === "Clouds") return { msg: "⛅ Partly cloudy day – great for a picnic or a walk.", emoji: "⛅" };
+  if (main === "Rain") return { msg: "🌧️ It's rainy. How about exploring indoor activities or a cozy cafe?", emoji: "🌧️" };
+  if (main === "Snow") return { msg: "❄️ Snowy day! Maybe go skiing or enjoy indoor fun.", emoji: "❄️" };
+  if (main === "Thunderstorm") return { msg: "⛈️ Thunderstorm alert! Best to plan indoor activities.", emoji: "⛈️" };
+  return { msg: `Today's weather: ${main}. Plan accordingly!`, emoji: "🌤️" };
+}
 
-  // Edit scheduled activity (re-pick mood)
-  const handleEdit = (day, slot, activity) => {
-    setPendingAssignment({ day, slot });
-    setModal({ open: false, activity });
-  };
-
-  // Remove scheduled activity
-  const handleRemove = (day, slot) => {
-    setSchedule((prev) => ({
-      ...prev,
-      [day]: { ...prev[day], [slot]: null },
-    }));
-  };
-
-  // Toggle lock state for a slot
-  const toggleLock = (day, slot) => {
-    setLocked((prev) => ({
-      ...prev,
-      [day]: { ...prev[day], [slot]: !prev[day][slot] },
-    }));
-  };
-
-  // Drag-and-drop reorder: swap activities between slots in a day
-  const handleReorder = (day, fromSlot, toSlot) => {
-    setSchedule((prev) => {
-      const newDay = { ...prev[day] };
-      const temp = newDay[fromSlot];
-      newDay[fromSlot] = newDay[toSlot];
-      newDay[toSlot] = temp;
-      return { ...prev, [day]: newDay };
-    });
-  };
-
-  // Export as image
-  const handleExport = () => {
-    const node = document.querySelector(".calendar-grid");
-    html2canvas(node).then((canvas) => {
+  function handleExportImage() {
+    if (!planRef.current) return;
+    
+    setSaveMsg("Preparing your beautiful plan...");
+    
+    html2canvas(planRef.current, { 
+      useCORS: true, 
+      backgroundColor: "#fff",
+      scale: 2, // Higher quality
+    }).then(canvas => {
       const link = document.createElement("a");
-      link.download = "weekendly-plan.png";
-      link.href = canvas.toDataURL();
+      link.download = "MyBeachPlan.png";
+      link.href = canvas.toDataURL("image/png");
       link.click();
+      
+      setSaveMsg("Plan exported successfully!");
+      setTimeout(() => setSaveMsg(""), 2000);
     });
+  }
+
+  const getTileClassName = ({ date, view }) => {
+    if (view === "month") {
+      const iso = date.toISOString().split("T")[0];
+      if (holidays.some(h => h.date === iso)) return "holiday-tile";
+      
+      // Check if date is in selected range
+      if (Array.isArray(dateValue) && dateValue[0] && dateValue[1]) {
+        if (date >= dateValue[0] && date <= dateValue[1]) {
+          return "selected-range-tile";
+        }
+      }
+    }
+    return undefined;
   };
 
-  // "Surprise Me" randomizer
-  const handleSurpriseMe = () => {
-    setSchedule((prev) => {
-      const moodObj = moods.find((m) => m.key === weekendMood);
-      const options = moodObj
-        ? activities.filter((a) => moodObj.activities.includes(a.name))
-        : activities;
-      const pickRandom = () => options[Math.floor(Math.random() * options.length)];
-      const newSchedule = { ...prev };
-      days.forEach((day) => {
-        timeSlots.forEach((slot) => {
-          if (!locked[day][slot]) {
-            newSchedule[day][slot] = pickRandom();
-          }
-        });
+  const getTileContent = ({ date, view }) => {
+    if (view === "month") {
+      const iso = date.toISOString().split("T")[0];
+      const h = holidays.find(h => h.date === iso);
+      if (h) return <span title={h.name} className="holiday-emoji">🎉</span>;
+    }
+    return null;
+  };
+
+  function onCalendarChange(value) {
+    setDateValue(value);
+    if (Array.isArray(value) && value[0] && value[1]) {
+      const days = [];
+      let cur = new Date(value[0]);
+      while (cur <= value[1]) {
+        days.push(cur.toISOString().slice(0, 10));
+        cur.setDate(cur.getDate() + 1);
+      }
+      setSelectedDays(days);
+      setHolidayName(""); // clear
+    } else if (value) {
+      const iso = value.toISOString().slice(0, 10);
+      setSelectedDays([iso]);
+      // If holiday, show name
+      const h = holidays.find(h => h.date === iso);
+      setHolidayName(h ? h.name : "");
+    }
+  }
+
+  function handleCalendarConfirm() {
+    setCalendarDone(true);
+  }
+
+  function handleAddActivity(day, slot) {
+    setBrowseModal({ open: true, day, slot });
+  }
+
+  function handleBrowseButton() {
+    setBrowsing(true);
+  }
+
+  function handleBrowseDoneSlot(selectedActs) {
+    selectedActs.forEach((act) => addActivity(browseModal.day, browseModal.slot, act));
+    setBrowseModal({ open: false, day: null, slot: null });
+  }
+
+  function handleBrowseDone(selectedActs) {
+    // Add to "morning" slot (or distribute as you wish)
+    selectedActs.forEach((act, idx) => {
+      const day = selectedDays[idx % selectedDays.length];
+      addActivity(day, "morning", act);
+    });
+    setBrowsing(false);
+  }
+
+  function handleSurpriseMe() {
+    if (!selectedDays.length) return;
+    
+    setSaveMsg("Creating a surprise plan for you! 🎉");
+
+    // Flatten all activities
+    const allActs = activities.flatMap(cat =>
+      cat.items.map(item => ({
+        ...item,
+        id: `${cat.id}-${item.id}`,
+        category: cat.name,
+        name: item.name,
+      }))
+    );
+
+    // Helper for random pick
+    const randomAct = () => allActs[Math.floor(Math.random() * allActs.length)];
+
+    // Build random plan: { [day]: { slot: [activity] } }
+    const randomPlan = {};
+    selectedDays.forEach(day => {
+      randomPlan[day] = {};
+      SLOT_KEYS.forEach(slot => {
+        randomPlan[day][slot] = [randomAct()];
       });
-      return newSchedule;
     });
-  };
+    
+    setTimeout(() => {
+      setPlan(randomPlan);
+      setSaveMsg("Surprise plan created! Enjoy your adventure! 🏄‍♂️");
+      setTimeout(() => setSaveMsg(""), 2000);
+    }, 800);
+  }
 
-  // Filter activities based on mood
-  const filteredActivities = weekendMood
-    ? activities.filter((a) =>
-        moods.find((m) => m.key === weekendMood)?.activities.includes(a.name)
-      )
-    : activities;
+  function handleSavePlan() {
+    if (!plan || Object.keys(plan).length === 0) {
+      setSaveMsg("No plan to save!");
+      setTimeout(() => setSaveMsg(""), 2000);
+      return;
+    }
+
+    // Get current plans array from localStorage or use empty array
+    const plans = JSON.parse(localStorage.getItem("savedPlans")) || [];
+
+    // Add a unique id if not present
+    if (!plan.id) {
+      plan.id = "beach-plan-" + Date.now();
+      plan.createdAt = new Date().toISOString();
+      plan.name = "Beach Getaway - " + new Date().toLocaleDateString();
+    }
+
+    // Remove any existing plan with the same id (replace if re-saving)
+    const filtered = plans.filter(p => p.id !== plan.id);
+
+    // Add current plan
+    filtered.push(plan);
+
+    // Save back to localStorage
+    localStorage.setItem("savedPlans", JSON.stringify(filtered));
+
+    setSaveMsg("Plan saved successfully! 🌴");
+    setTimeout(() => setSaveMsg(""), 2000);
+  }
 
   return (
-    <div className="app-container">
-      <header>
-        <h1>Weekendly</h1>
-        <p>Plan your perfect weekend, visually and easily!</p>
-        <div style={{ margin: "1rem 0" }}>
-          <label htmlFor="themePicker" style={{ marginRight: 8 }}>
-            Theme:
-          </label>
-          <select
-            id="themePicker"
-            value={theme}
-            onChange={(e) => setTheme(e.target.value)}
-            style={{
-              padding: "0.4rem 1rem",
-              borderRadius: 6,
-              border: "1px solid #ccc",
-            }}
-          >
-            {Object.keys(themes).map((t) => (
-              <option value={t} key={t}>
-                {t.charAt(0).toUpperCase() + t.slice(1)}
-              </option>
-            ))}
-          </select>
+    <div className="homepage-root">
+      <div className="beach-background">
+        <div className="ocean">
+          <div className={`wave ${animateWave ? 'animate-wave' : ''}`}></div>
+          <div className={`wave wave2 ${animateWave ? 'animate-wave' : ''}`}></div>
+          <div className={`wave wave3 ${animateWave ? 'animate-wave' : ''}`}></div>
         </div>
-        <MoodBoard selectedMood={weekendMood} onSelect={setWeekendMood} />
-        <button
-          style={{
-            margin: "1rem 1rem 1rem 0",
-            background: "#ffe380",
-            fontWeight: "bold",
-            borderRadius: 6,
-            padding: "0.6rem 1.5rem",
-            cursor: "pointer",
-            border: "none",
-          }}
-          onClick={handleSurpriseMe}
-        >
-          🎡 Surprise Me!
-        </button>
-        <button
-          onClick={handleExport}
-          style={{
-            margin: "1rem 0",
-            background: "#a3e3d3",
-            fontWeight: "bold",
-            borderRadius: 6,
-            padding: "0.6rem 1.5rem",
-            cursor: "pointer",
-            border: "none",
-          }}
-        >
-          📸 Export Weekend Plan as Image
-        </button>
-      </header>
-
-      <ActivityBrowser
-        activities={filteredActivities}
-        onAdd={handleAddToSchedule}
-        mood={weekendMood}
-      />
-
-        <TimelineView
-    selectedDates={selectedDates}
-    schedule={schedule}
-    timeSlots={timeSlots}
-    onEdit={handleEdit}
-    onRemove={handleRemove}
-    onReorder={handleReorder}
-    locked={locked}
-    toggleLock={toggleLock}
-    />
-
-      {/* Modal for selecting day/slot */}
-      {modal.open && (
-        <div className="modal-backdrop">
-          <div className="modal">
-            <h3>Pick a time slot</h3>
-            <div className="modal-options">
-              {days.map((day) =>
-                timeSlots.map((slot) => (
-                  <button
-                    className="slot-btn"
-                    key={day + slot}
-                    disabled={!!schedule[day][slot]}
-                    onClick={() => handleAssign(day, slot)}
-                  >
-                    {day.charAt(0).toUpperCase() + day.slice(1)} -{" "}
-                    {slot.charAt(0).toUpperCase() + slot.slice(1)}
-                  </button>
-                ))
+        <div className="sand"></div>
+        <div className="palm-tree left"></div>
+        <div className="palm-tree right"></div>
+        <div className="sun"></div>
+        <div className="cloud cloud1"></div>
+        <div className="cloud cloud2"></div>
+      </div>
+      
+      {!calendarDone ? (
+        <div className="calendar-section">
+          <div className="calendar-container">
+            <h2 className="calendar-header">
+              <span className="emoji-icon">🏝️</span> Plan Your Perfect Weekend!!
+              <span className="emoji-icon">🌴</span>
+            </h2>
+            
+            <div className="calendar-wrapper">
+              <Calendar
+                onChange={onCalendarChange}
+                value={dateValue}
+                selectRange={true}
+                className="main-calendar"
+                tileClassName={getTileClassName}
+                tileContent={getTileContent}
+              />
+            </div>
+            {holidayName && (
+              <div className="calendar-holiday-name">
+                <span role="img" aria-label="holiday">🎉</span> {holidayName}
+              </div>
+            )}
+            <div className="calendar-selected-dates">
+              {Array.isArray(dateValue) && dateValue[0] && dateValue[1] && (
+                <>
+                  <span>Selected: </span>
+                  <b>
+                    {dateValue[0].toLocaleDateString()} –{" "}
+                    {dateValue[1].toLocaleDateString()}
+                  </b>
+                </>
+              )}
+              {Array.isArray(dateValue) && dateValue[0] && !dateValue[1] && (
+                <>
+                  <span>Selected: </span>
+                  <b>
+                    {dateValue[0].toLocaleDateString()}
+                  </b>
+                </>
               )}
             </div>
             <button
-              className="close-btn"
-              onClick={() => setModal({ open: false, activity: null })}
+              className="calendar-confirm-btn"
+              disabled={!(Array.isArray(dateValue) && dateValue[0] && dateValue[1]) && !holidayName}
+              onClick={handleCalendarConfirm}
             >
-              Cancel
+              <span className="btn-text">Start Planning</span>
+              <span className="btn-icon">🏄‍♂️</span>
             </button>
           </div>
         </div>
-      )}
+      ) : (
+        <div className="planning-screen">
+          <div className="planning-header">
+            <h1 className="plan-title">Weekendly: Effortless Weekend Planning</h1>
+            <p className="plan-subtitle">Create unforgettable moments for your perfect vacation</p>
+          </div>
 
-      {/* Mood picker modal */}
-      {pendingAssignment && (
-        <div className="modal-backdrop">
-          <div className="modal">
-            <MoodPicker onPick={handleMoodPick} />
+          <div className="weather-banner">
+  {weatherLoading ? (
+    <span>Loading weather...</span>
+  ) : weatherError ? (
+    <span>{weatherError}</span>
+  ) : weatherInfo ? (
+    <span>
+      {getWeatherSuggestion(weatherInfo).emoji}
+      &nbsp;{getWeatherSuggestion(weatherInfo).msg}&nbsp;
+      <span style={{ fontWeight: 600, color: "#0072a3" }}>
+        {Math.round(weatherInfo.main.temp)}°C
+      </span>
+      {" | "}
+      {weatherInfo.name}
+    </span>
+  ) : null}
+</div>
+          <div className="planning-topbar">
+            
             <button
-              className="close-btn"
-              onClick={() => setPendingAssignment(null)}
+              className="action-btn browse-activities-btn"
+              onClick={handleBrowseButton}
             >
-              Cancel
+              <span className="btn-icon">🔍</span>
+              <span className="btn-text">Browse Activities</span>
             </button>
+            
+            <button
+              className="action-btn surprise-btn"
+              onClick={handleSurpriseMe}
+            >
+              <span className="btn-icon">🎲</span>
+              <span className="btn-text">Surprise Me!</span>
+            </button>
+            
+            <button
+              className="action-btn save-plan-btn"
+              onClick={handleSavePlan}
+            >
+              <span className="btn-icon">💾</span>
+              <span className="btn-text">Save Plan</span>
+            </button>
+            
+            <button
+              className="action-btn export-plan-btn"
+              onClick={handleExportImage}
+            >
+              <span className="btn-icon">🖼️</span>
+              <span className="btn-text">Export Plan</span>
+            </button>
+            
+            <button
+              className="action-btn distance-btn"
+              onClick={() => setShowDistance(true)}
+            >
+              <span className="btn-icon">🗺️</span>
+              <span className="btn-text">Show Route</span>
+            </button>
+
+            <button className="action-btn distance-btn" onClick={handleSavedPlanClick} >
+   <span className="btn-text">Saved Plans</span>
+</button>
           </div>
+          
+          {saveMsg && (
+            <div className="save-message">
+              {saveMsg}
+            </div>
+          )}
+          
+          <div className="plan-container" ref={planRef}>
+            <PlanTimelineEditor onAddActivity={handleAddActivity} />
+          </div>
+          
+          {/* Distance Tracker Modal Overlay */}
+          {showDistance && (
+            <div className="modal-overlay distance-tracker-overlay">
+              <div className="modal-card distance-tracker-modal-card">
+                <button
+                  className="close-modal-btn"
+                  onClick={() => setShowDistance(false)}
+                >
+                  ×
+                </button>
+                <h3 className="modal-title">Distance & Route Planner</h3>
+                <DistanceTracker />
+              </div>
+            </div>
+          )}
         </div>
       )}
 
-      <footer>
-        <p
-          style={{
-            marginTop: 40,
-            fontSize: "0.95rem",
-            color: "#aaa",
-          }}
-        >
-          &copy; {new Date().getFullYear()} Weekendly &mdash; Built with React +
-          Vite
-        </p>
-      </footer>
+      {browsing && (
+        <div className="modal-overlay">
+          <div className="modal-card browse-modal-card">
+            <button
+              className="close-modal-btn"
+              onClick={() => setBrowsing(false)}
+            >
+              ×
+            </button>
+            <BrowseActivitiesModal
+              onSave={handleBrowseDone}
+              onClose={() => setBrowsing(false)}
+            />
+          </div>
+        </div>
+      )}
+      
+      {browseModal.open && (
+        <div className="modal-overlay">
+          <div className="modal-card browse-modal-card">
+            <button
+              className="close-modal-btn"
+              onClick={() => setBrowseModal({ open: false, day: null, slot: null })}
+            >
+              ×
+            </button>
+            <BrowseActivitiesModal
+              onSave={handleBrowseDoneSlot}
+              onClose={() => setBrowseModal({ open: false, day: null, slot: null })}
+            />
+          </div>
+        </div>
+      )}
+      
+      <button
+        className="chatbot-fab"
+        aria-label={showChatbot ? "Hide Smart Recommender" : "Show Smart Recommender"}
+        onClick={() => setShowChatbot(s => !s)}
+        style={{
+          position: "fixed",
+          right: 24,
+          bottom: 24,
+          zIndex: 1100,
+          border: "none",
+          background: "#fef08a",
+          borderRadius: "50%",
+          width: 56,
+          height: 56,
+          boxShadow: "0 2px 12px #0002",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontSize: 32,
+          cursor: "pointer",
+          transition: "background 0.2s"
+        }}
+        title={showChatbot ? "Close Smart Recommender" : "Open Smart Recommender"}
+      >
+        {showChatbot ? "✖️" : "💬"}
+      </button>
+      {/* Smart Recommender Chatbot */}
+      {showChatbot && (
+        <div className="chatbot-popup">
+          <RecommenderChatbot />
+        </div>
+      )}
     </div>
   );
 }
-
-export default HomePage;
-
-// import React, { useState } from 'react';
-// import { Calendar, Search, Palette, Plus, Sun, Moon } from 'lucide-react';
-// import { WeekendlyHeader } from './WeekendlyHeader';
-// import { MoodSelector } from './MoodSelector';
-// import { ActivityBrowser } from './ActivityBrowser';
-// // Drop-in your own simple Badge component
-// import { Badge } from '../components/Badge';
-// // Drop-in your own Dialog components or use a dialog library
-// import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../components/Dialog';
-// import { ScheduledActivityCard } from './ScheduledActivityCard';
-// import { useWeekendly } from '../contexts/ScheduleContext';
-
-// // Minimal cn utility (classNames joiner)
-// function cn(...classes) {
-//   return classes.filter(Boolean).join(' ');
-// }
-
-// const TIME_SLOTS = [
-//   { id: 'morning', label: 'Morning', icon: <Sun className="h-4 w-4" />, time: '6AM - 12PM' },
-//   { id: 'afternoon', label: 'Afternoon', icon: <Calendar className="h-4 w-4" />, time: '12PM - 6PM' },
-//   { id: 'evening', label: 'Evening', icon: <Moon className="h-4 w-4" />, time: '6PM - 12AM' },
-// ];
-
-// function DaySchedule({ day, title, gradient }) {
-//   const { state, removeActivity, addActivity } = useWeekendly();
-//   const [selectedTimeSlot, setSelectedTimeSlot] = useState('morning');
-//   const [isDialogOpen, setIsDialogOpen] = useState(false);
-
-//   const dayActivities = state.currentPlan?.activities.filter(a => a.day === day) || [];
-
-//   const getActivitiesForTimeSlot = (timeSlot) => {
-//     return dayActivities.filter(a => a.timeSlot === timeSlot);
-//   };
-
-//   const handleActivitySelect = (activity) => {
-//     addActivity(activity, day, selectedTimeSlot);
-//     setIsDialogOpen(false);
-//   };
-
-//   const openAddDialog = (timeSlot) => {
-//     setSelectedTimeSlot(timeSlot);
-//     setIsDialogOpen(true);
-//   };
-
-//   return (
-//     <div className="weekend-card bg-white shadow rounded-2xl overflow-hidden mb-8">
-//       <div className={cn('p-4 rounded-t-2xl text-white mb-4', gradient)}>
-//         <h2 className="text-xl font-bold flex items-center">
-//           <Calendar className="h-5 w-5 mr-2" />
-//           {title}
-//         </h2>
-//         <p className="text-white/80 text-sm">
-//           {dayActivities.length} activities planned
-//         </p>
-//       </div>
-//       <div className="px-4 pb-4 space-y-4">
-//         {TIME_SLOTS.map((timeSlot) => {
-//           const activities = getActivitiesForTimeSlot(timeSlot.id);
-//           return (
-//             <div key={timeSlot.id} className="space-y-2">
-//               <div className="flex items-center justify-between">
-//                 <div className="flex items-center space-x-2">
-//                   {timeSlot.icon}
-//                   <span className="font-medium">{timeSlot.label}</span>
-//                   <span className="text-xs text-muted-foreground">{timeSlot.time}</span>
-//                 </div>
-//                 <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-//                   <DialogTrigger asChild>
-//                     <button
-//                       type="button"
-//                       onClick={() => openAddDialog(timeSlot.id)}
-//                       className="h-7 px-2 py-1 rounded border border-gray-300 hover:bg-gray-100 flex items-center text-xs"
-//                     >
-//                       <Plus className="h-3 w-3" />
-//                     </button>
-//                   </DialogTrigger>
-//                   <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-//                     <DialogHeader>
-//                       <DialogTitle>
-//                         Add Activity to {title} {timeSlot.label}
-//                       </DialogTitle>
-//                     </DialogHeader>
-//                     <ActivityBrowser onActivitySelect={handleActivitySelect} />
-//                   </DialogContent>
-//                 </Dialog>
-//               </div>
-//               <div className="min-h-[60px] p-2 border-2 border-dashed border-border/30 rounded-lg space-y-2">
-//                 {activities.length > 0 ? (
-//                   activities.map((activity) => (
-//                     <ScheduledActivityCard
-//                       key={activity.id}
-//                       activity={activity}
-//                       onRemove={removeActivity}
-//                     />
-//                   ))
-//                 ) : (
-//                   <div className="flex items-center justify-center h-14 text-muted-foreground text-sm">
-//                     Drop an activity here or click + to add
-//                   </div>
-//                 )}
-//               </div>
-//             </div>
-//           );
-//         })}
-//       </div>
-//     </div>
-//   );
-// }
-
-// export function WeekendSchedule() {
-//   const { state } = useWeekendly();
-
-//   if (!state.currentPlan || state.currentPlan.activities.length === 0) {
-//     return (
-//       <div className="text-center py-12">
-//         <div className="text-6xl mb-4 animate-bounce-gentle">📅</div>
-//         <h3 className="text-xl font-semibold mb-2">No weekend plans yet!</h3>
-//         <p className="text-muted-foreground mb-4">
-//           Start by selecting your mood and browse activities to create your perfect weekend.
-//         </p>
-//         <Badge variant="secondary" className="text-sm">
-//           Tip: Activities will appear here as you add them
-//         </Badge>
-//       </div>
-//     );
-//   }
-
-//   return (
-//     <div className="space-y-6">
-//       <div className="text-center space-y-2">
-//         <h2 className="text-2xl font-bold">Your Weekend Plan</h2>
-//         <p className="text-muted-foreground">
-//           Total activities: {state.currentPlan.activities.length} • 
-//           Mood: <span className="capitalize text-primary font-medium">{state.currentPlan.mood}</span>
-//         </p>
-//       </div>
-//       <div className="grid md:grid-cols-2 gap-6">
-//         <DaySchedule
-//           day="saturday"
-//           title="Saturday"
-//           gradient="gradient-saturday"
-//         />
-//         <DaySchedule
-//           day="sunday"
-//           title="Sunday"
-//           gradient="gradient-sunday"
-//         />
-//       </div>
-//     </div>
-//   );
-// }
-
-// export default function HomePage() {
-//   const [activeTab, setActiveTab] = useState('mood');
-//   const { addActivity } = useWeekendly();
-
-//   const handleActivitySelect = (activity) => {
-//     // Default to Saturday morning for quick add
-//     addActivity(activity, 'saturday', 'morning');
-//     setActiveTab('schedule');
-//   };
-
-//   return (
-//     <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/20">
-//       <WeekendlyHeader />
-
-//       <main className="container max-w-screen-2xl mx-auto px-4 py-8">
-//         <div className="space-y-8">
-//           <div className="flex justify-center">
-//             <div className="grid grid-cols-3 w-full max-w-md">
-//               <button 
-//                 type="button"
-//                 onClick={() => setActiveTab('mood')}
-//                 className={
-//                   'flex items-center justify-center px-4 py-2 rounded ' +
-//                   (activeTab === 'mood'
-//                     ? 'bg-primary text-white'
-//                     : 'bg-white text-primary border border-primary')
-//                 }
-//               >
-//                 <Palette className="h-4 w-4 mr-2" />
-//                 <span className="hidden sm:inline">Mood</span>
-//               </button>
-//               <button 
-//                 type="button"
-//                 onClick={() => setActiveTab('activities')}
-//                 className={
-//                   'flex items-center justify-center px-4 py-2 rounded ' +
-//                   (activeTab === 'activities'
-//                     ? 'bg-primary text-white'
-//                     : 'bg-white text-primary border border-primary')
-//                 }
-//               >
-//                 <Search className="h-4 w-4 mr-2" />
-//                 <span className="hidden sm:inline">Browse</span>
-//               </button>
-//               <button 
-//                 type="button"
-//                 onClick={() => setActiveTab('schedule')}
-//                 className={
-//                   'flex items-center justify-center px-4 py-2 rounded ' +
-//                   (activeTab === 'schedule'
-//                     ? 'bg-primary text-white'
-//                     : 'bg-white text-primary border border-primary')
-//                 }
-//               >
-//                 <Calendar className="h-4 w-4 mr-2" />
-//                 <span className="hidden sm:inline">Schedule</span>
-//               </button>
-//             </div>
-//           </div>
-
-//           {activeTab === 'mood' && (
-//             <div className="max-w-4xl mx-auto">
-//               <MoodSelector />
-//               <div className="flex justify-center mt-8">
-//                 <button 
-//                   type="button"
-//                   onClick={() => setActiveTab('activities')}
-//                   className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-3 rounded-full text-white font-semibold transition"
-//                 >
-//                   Browse Activities →
-//                 </button>
-//               </div>
-//             </div>
-//           )}
-
-//           {activeTab === 'activities' && (
-//             <div className="max-w-6xl mx-auto">
-//               <ActivityBrowser onActivitySelect={handleActivitySelect} />
-//             </div>
-//           )}
-
-//           {activeTab === 'schedule' && (
-//             <div className="max-w-6xl mx-auto">
-//               <WeekendSchedule />
-//             </div>
-//           )}
-//         </div>
-//       </main>
-
-//       {/* Floating Weekend Summary */}
-//       <div className="fixed bottom-6 right-6 z-40">
-//         <button
-//           type="button"
-//           onClick={() => setActiveTab('schedule')}
-//           className="rounded-full shadow-lg bg-primary hover:bg-primary/90 animate-float flex items-center px-6 py-3 text-white font-semibold transition"
-//         >
-//           <Calendar className="h-4 w-4 mr-2" />
-//           View Plan
-//         </button>
-//       </div>
-//     </div>
-//   );
-// }

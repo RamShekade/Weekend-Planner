@@ -10,7 +10,7 @@ import { Point } from "ol/geom";
 import VectorSource from "ol/source/Vector";
 import { Icon, Style } from "ol/style";
 
-// A public domain red marker SVG
+// red marker SVG
 const RED_MARKER_URL =
   "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png";
 
@@ -22,7 +22,7 @@ export default function PlacePickerModal({ onPick, onClose }) {
   const markerSource = useRef(new VectorSource());
   const mapInstance = useRef(null);
 
-  // Fetch places from OpenStreetMap Nominatim
+  // Fetching places from OpenStreetMap Nominatim
   async function handleSearch() {
     if (!input.trim()) return;
     const res = await fetch(
@@ -34,7 +34,7 @@ export default function PlacePickerModal({ onPick, onClose }) {
     setSearchResults(data);
   }
 
-  // Initialize map only once
+  // Initialize map 
   useEffect(() => {
     if (mapInstance.current) return;
 
@@ -46,7 +46,7 @@ export default function PlacePickerModal({ onPick, onClose }) {
           source: markerSource.current,
           style: new Style({
             image: new Icon({
-              src: RED_MARKER_URL, // Use red marker icon
+              src: RED_MARKER_URL, 
               anchor: [0.5, 1],
               scale: 1,
             }),
@@ -54,8 +54,8 @@ export default function PlacePickerModal({ onPick, onClose }) {
         }),
       ],
       view: new View({
-        center: fromLonLat([77.5946, 12.9716]), // Default to Bangalore
-        zoom: 4,
+        center: fromLonLat([72.8321, 18.9582]), // Default to Mumbai
+        zoom: 10,
       }),
     });
 
