@@ -382,6 +382,8 @@ function getWeatherSuggestion(weather) {
             
             <button
               className="action-btn save-plan-btn"
+              aria-label="save plan"
+
               onClick={handleSavePlan}
             >
               <span className="btn-icon">💾</span>
