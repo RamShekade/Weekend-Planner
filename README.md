@@ -1,5 +1,3 @@
-👇
-
 🎉 Weekendly – Your Personal Weekend Planner
 
 Atlan Frontend Engineering Internship Challenge – 2025
