@@ -368,7 +368,7 @@ import { activities } from "../data/activities";
 import html2canvas from "html2canvas";
 import DistanceTracker from "./DistanceTracker";
 import RecommenderChatbot from "./Chatbot";
-import "./chatbot.css";
+import "./Chatbot.css";
 import CalendarSelector from "./CalendarSelector";
 
 const SLOT_KEYS = ["morning", "afternoon", "evening", "night"];
