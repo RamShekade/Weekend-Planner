@@ -33,7 +33,6 @@ From brunches to hikes, from lazy Sundays to adventurous getaways — Weekendly 
 
 🗺 Route + distance calculation – see travel path, total distance & estimated time.
 
-🍔 (Optional) Integration ideas – find nearby food spots/events for even richer planning.
 
 🤖 Assistance
 
@@ -93,7 +92,7 @@ Offline: PWA + localStorage
 
 Clone the repo
 
-git clone https://github.com/your-username/weekendly.git
+git clone https://github.com/RamShekade/weekendly.git
 cd weekendly
 
 
@@ -124,7 +123,7 @@ npm test
 ## 📸 Screenshots  
 
 ### 🏠 Landing Page  
-![Landing Page](./screenshots/home.png)  
+![Landing Page](./screenshots/landing.png)  
 
 ### 📅 Weekend Planner  
 ![Planner](./screenshots/plan.png)  
