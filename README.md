@@ -92,8 +92,8 @@ Offline: PWA + localStorage
 
 Clone the repo
 
-git clone https://github.com/RamShekade/weekendly.git
-cd weekendly
+git clone https://github.com/RamShekade/weekend-planner.git
+cd weekend-planner
 
 
 Install dependencies
